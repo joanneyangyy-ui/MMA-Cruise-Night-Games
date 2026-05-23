@@ -1,0 +1,444 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --red:#ff2d55;--orange:#ff6b00;--yellow:#ffd000;--green:#00e676;--cyan:#00e5ff;--purple:#d500f9;--pink:#ff4081;
+  --bg:#0d0d0d;--card:#1a1a1a;--border:rgba(255,255,255,0.12);--text:#ffffff;--muted:rgba(255,255,255,0.5);
+}
+body{background:transparent;font-family:'DM Sans',sans-serif;color:var(--text);}
+.app{background:var(--bg);border-radius:18px;padding:24px 20px 28px;min-height:560px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
+.stripe{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--cyan),var(--purple),var(--pink));}
+.glow1{position:absolute;top:-120px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,45,85,0.18) 0%,transparent 70%);pointer-events:none;}
+.glow2{position:absolute;bottom:-80px;left:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(0,229,255,0.12) 0%,transparent 70%);pointer-events:none;}
+.header{text-align:center;margin-bottom:20px;margin-top:6px;}
+.eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.header h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1.1;}
+.header h1 span{background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+.tabs{display:flex;gap:5px;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;margin-bottom:18px;}
+.tab{flex:1;padding:8px 2px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;border-radius:9px;cursor:pointer;transition:all 0.2s;}
+.tab.active{background:linear-gradient(135deg,var(--red),var(--orange));color:#fff;font-weight:700;}
+.panel{display:none;}.panel.active{display:block;}
+
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;}
+.cat-btn{padding:7px 4px;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:8px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.18s;text-align:center;}
+.cat-btn.selected{border-color:var(--orange);background:rgba(255,107,0,0.15);color:var(--orange);}
+
+.word-display{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 18px;text-align:center;margin-bottom:14px;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.word-display::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,45,85,0.06),rgba(255,107,0,0.06),rgba(0,229,255,0.04));pointer-events:none;}
+.word-cat-tag{position:absolute;top:10px;left:12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);opacity:0.9;}
+.word-term{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;line-height:1.15;}
+.word-hint{font-size:13px;color:var(--muted);max-width:320px;line-height:1.5;}
+.diff-dots{display:flex;gap:4px;margin-top:10px;}
+.diff-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);}
+.diff-dot.lit{background:var(--orange);}
+
+.loading-bar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:12px;overflow:hidden;display:none;}
+.loading-bar.active{display:block;}
+.loading-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--cyan));border-radius:2px;animation:lb 1.2s ease-in-out infinite;}
+@keyframes lb{0%{width:0%;margin-left:0;}50%{width:65%;margin-left:15%;}100%{width:0%;margin-left:100%;}}
+
+.gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--red),var(--orange));color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+.gen-btn:hover{opacity:0.9;transform:translateY(-1px);}
+.gen-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+.score-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.score-header h2{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
+.round-badge{background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.4);color:var(--orange);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+.team-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:11px;margin-bottom:7px;transition:all 0.2s;cursor:default;}
+.team-row.leader{border-color:rgba(255,45,85,0.5);background:rgba(255,45,85,0.07);}
+.team-rank{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--muted);width:18px;text-align:center;}
+.team-row.leader .team-rank{color:var(--red);}
+.team-name-col{flex:1;}
+.team-name-text{font-size:13px;font-weight:500;}
+.team-member-count{font-size:11px;color:var(--muted);}
+.bar-wrap{flex:2;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+.team-pts{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;min-width:28px;text-align:right;}
+
+.score-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;}
+.sc-btn{padding:9px 6px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.sc-btn:hover{border-color:var(--orange);color:var(--orange);}
+.sc-btn.danger:hover{border-color:var(--red);color:var(--red);}
+
+.join-section h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:#fff;}
+.join-input-row{display:flex;gap:8px;margin-bottom:14px;}
+.join-input-row input{flex:1;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+.join-input-row input:focus{border-color:var(--orange);}
+.join-input-row input::placeholder{color:var(--muted);}
+.join-btn{padding:9px 16px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:9px;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+
+.join-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.join-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.join-card:hover{transform:translateY(-2px);}
+.join-card.joined{border-width:2px;}
+.join-card-emoji{font-size:24px;margin-bottom:4px;display:block;}
+.join-card-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:2px;}
+.join-card-count{font-size:11px;color:var(--muted);}
+.joined-badge{display:none;position:absolute;top:6px;right:8px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;font-family:'DM Sans',sans-serif;color:#fff;}
+.join-card.joined .joined-badge{display:block;}
+.my-team-banner{background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.3);border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:13px;display:none;color:var(--text);}
+.my-team-banner span{color:var(--orange);font-weight:500;}
+
+.timer-wrap{text-align:center;padding:16px 0 8px;}
+.timer-ring{position:relative;width:140px;height:140px;margin:0 auto 12px;}
+.timer-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:rgba(255,255,255,0.07);stroke-width:7;}
+.ring-fill{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.3s;}
+.timer-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.timer-face{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1;transition:color 0.3s;}
+.timer-face.urgent{color:var(--red);}
+.timer-label{color:var(--muted);font-size:12px;margin-bottom:16px;}
+.presets{display:flex;gap:7px;justify-content:center;margin-bottom:16px;}
+.preset-btn{padding:6px 14px;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:20px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.preset-btn.sel{border-color:var(--orange);color:var(--orange);background:rgba(255,107,0,0.1);}
+.t-btns{display:flex;gap:8px;justify-content:center;}
+.t-btn{padding:11px 28px;border-radius:11px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;}
+.t-btn.primary{background:linear-gradient(135deg,var(--red),var(--orange));color:#fff;}
+.t-btn.primary:hover{opacity:0.9;}
+.t-btn.secondary{background:var(--card);border:1px solid var(--border);color:var(--text);}
+</style>
+
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Cruise Night Fun Game — colorful edition</h2>
+
+<div class="app">
+  <div class="stripe"></div>
+  <div class="glow1"></div>
+  <div class="glow2"></div>
+
+  <div class="header">
+    <div class="eyebrow">Queen's MMA · Cruise Night</div>
+    <h1>AI Says… <span>What?</span></h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('words')">Words</button>
+    <button class="tab" onclick="switchTab('join')">Join Team</button>
+    <button class="tab" onclick="switchTab('score')">Scores</button>
+    <button class="tab" onclick="switchTab('timer')">Timer</button>
+  </div>
+
+  <!-- WORDS -->
+  <div class="panel active" id="panel-words">
+    <div class="cat-grid">
+      <button class="cat-btn selected" data-cat="Movies">Movies</button>
+      <button class="cat-btn selected" data-cat="Countries">Countries</button>
+      <button class="cat-btn selected" data-cat="Food & Drink">Food & Drink</button>
+      <button class="cat-btn selected" data-cat="Pop Culture">Pop Culture</button>
+      <button class="cat-btn selected" data-cat="Sports">Sports</button>
+      <button class="cat-btn selected" data-cat="Fun Facts">Fun Facts</button>
+    </div>
+    <div class="loading-bar" id="loadBar"><div class="loading-bar-fill"></div></div>
+    <div class="word-display" id="wordDisplay">
+      <div class="word-cat-tag" id="wordCatTag"></div>
+      <div class="word-term" id="wordTerm">Press Generate!</div>
+      <div class="word-hint" id="wordHint">Pick categories above then tap to get a word for your team to guess.</div>
+      <div class="diff-dots" id="diffDots"></div>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generateWord()">Generate Word</button>
+  </div>
+
+  <!-- JOIN -->
+  <div class="panel" id="panel-join">
+    <div class="my-team-banner" id="myTeamBanner">You're on <span id="myTeamName"></span>! Tap another to switch.</div>
+    <div class="join-section">
+      <h3>Enter your name, then pick a team</h3>
+      <div class="join-input-row">
+        <input type="text" id="playerName" placeholder="Your name..." maxlength="24"/>
+        <button class="join-btn" onclick="confirmName()">Set</button>
+      </div>
+    </div>
+    <div class="join-grid" id="joinGrid"></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center;">Tap a team to join. Host sees members on the Scores tab.</div>
+  </div>
+
+  <!-- SCORES -->
+  <div class="panel" id="panel-score">
+    <div class="score-header">
+      <h2>Scoreboard</h2>
+      <span class="round-badge" id="roundBadge">Round 1</span>
+    </div>
+    <div id="teamList"></div>
+    <div class="score-btns">
+      <button class="sc-btn" onclick="addPoint()"><i class="ti ti-plus" aria-hidden="true"></i> Award point</button>
+      <button class="sc-btn" onclick="nextRound()"><i class="ti ti-arrow-right" aria-hidden="true"></i> Next round</button>
+      <button class="sc-btn" onclick="addBonus()"><i class="ti ti-star" aria-hidden="true"></i> Bonus (+2)</button>
+      <button class="sc-btn danger" onclick="resetAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Reset all</button>
+    </div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="panel" id="panel-timer">
+    <div class="timer-wrap">
+      <div class="timer-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="62"/>
+          <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="62" stroke-dasharray="389.6" stroke-dashoffset="0" stroke="url(#tg)"/>
+          <defs>
+            <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff2d55"/>
+              <stop offset="50%" stop-color="#ff6b00"/>
+              <stop offset="100%" stop-color="#ffd000"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="timer-center">
+          <div class="timer-face" id="timerFace">0:30</div>
+        </div>
+      </div>
+      <div class="timer-label" id="timerLabel">Choose a duration and start</div>
+      <div class="presets">
+        <button class="preset-btn sel" onclick="setTimer(30,this)">30s</button>
+        <button class="preset-btn" onclick="setTimer(60,this)">60s</button>
+        <button class="preset-btn" onclick="setTimer(90,this)">90s</button>
+        <button class="preset-btn" onclick="setTimer(120,this)">2m</button>
+      </div>
+      <div class="t-btns">
+        <button class="t-btn primary" id="startBtn" onclick="toggleTimer()">Start</button>
+        <button class="t-btn secondary" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORDS={
+  "Movies":[
+    {term:"The Lion King",hint:"A young prince flees his kingdom after his father's death, only to return and reclaim his throne",diff:1},
+    {term:"Titanic",hint:"A love story aboard a doomed ocean liner hitting an iceberg in 1912",diff:1},
+    {term:"Inception",hint:"A thief who steals secrets through dream-sharing technology is given a mission to plant an idea",diff:2},
+    {term:"Home Alone",hint:"An 8-year-old accidentally left behind must defend his house from two bumbling burglars",diff:1},
+    {term:"The Avengers",hint:"Earth's mightiest heroes must come together to stop an alien invasion led by Loki",diff:1},
+    {term:"Forrest Gump",hint:"A slow-witted but kind-hearted man witnesses and unwittingly influences several defining historical events",diff:1},
+    {term:"Jurassic Park",hint:"Scientists clone dinosaurs for a theme park but things go terribly wrong",diff:1},
+    {term:"The Matrix",hint:"A computer hacker discovers the world is a simulated reality and joins a rebellion",diff:1},
+    {term:"Finding Nemo",hint:"A clownfish crosses the ocean to rescue his son who was taken by a scuba diver",diff:1},
+    {term:"Interstellar",hint:"Astronauts travel through a wormhole near Saturn in search of a new home for humanity",diff:2},
+    {term:"La La Land",hint:"A jazz musician and an aspiring actress fall in love while chasing their dreams in Los Angeles",diff:2},
+    {term:"The Dark Knight",hint:"Batman faces a criminal mastermind who wants to plunge Gotham City into chaos",diff:1},
+  ],
+  "Countries":[
+    {term:"Iceland",hint:"A Nordic island nation famous for the Northern Lights, geysers, and no mosquitoes",diff:1},
+    {term:"Bhutan",hint:"A tiny Himalayan kingdom that measures Gross National Happiness instead of GDP",diff:2},
+    {term:"New Zealand",hint:"A South Pacific nation of two main islands, famous for hobbits and rugby",diff:1},
+    {term:"Morocco",hint:"A North African country famous for its medinas, tagine, and the Sahara Desert",diff:1},
+    {term:"Norway",hint:"A Scandinavian country with fjords, the midnight sun, and the world's largest sovereign wealth fund",diff:1},
+    {term:"Japan",hint:"An island nation in East Asia famous for cherry blossoms, bullet trains, and sushi",diff:1},
+    {term:"Brazil",hint:"The largest country in South America, home to the Amazon, Carnival, and five World Cup wins",diff:1},
+    {term:"Switzerland",hint:"A landlocked European country known for chocolate, cheese, watches, and neutrality",diff:1},
+    {term:"Ethiopia",hint:"An East African nation considered the birthplace of coffee and home to ancient kingdoms",diff:2},
+    {term:"Canada",hint:"The world's second-largest country by area, famous for maple syrup, hockey, and saying sorry",diff:1},
+  ],
+  "Food & Drink":[
+    {term:"Sushi",hint:"Japanese dish of vinegared rice topped with raw fish or other ingredients",diff:1},
+    {term:"Croissant",hint:"A buttery, flaky pastry shaped like a crescent moon",diff:1},
+    {term:"Guacamole",hint:"A dip made from mashed avocados, lime, and cilantro",diff:1},
+    {term:"Espresso",hint:"A small but mighty concentrated coffee made by forcing hot water through finely ground beans",diff:1},
+    {term:"Dim Sum",hint:"A Cantonese tradition of small bite-sized portions served in steamer baskets",diff:1},
+    {term:"Poutine",hint:"A Canadian comfort food of fries topped with cheese curds and gravy",diff:1},
+    {term:"Tiramisu",hint:"An Italian dessert with layers of espresso-soaked ladyfingers and mascarpone cream",diff:1},
+    {term:"Kimchi",hint:"A Korean staple of fermented, spicy vegetables usually made with cabbage",diff:1},
+    {term:"Baklava",hint:"A rich Middle Eastern pastry made of layers of filo dough filled with nuts and honey",diff:2},
+    {term:"Bubble Tea",hint:"A Taiwanese drink of tea with chewy tapioca pearls, also called boba",diff:1},
+  ],
+  "Pop Culture":[
+    {term:"Taylor Swift",hint:"A global pop star who re-recorded her albums and sold out stadiums on her Eras Tour",diff:1},
+    {term:"Netflix",hint:"A streaming giant that started by mailing DVDs and killed the video rental store",diff:1},
+    {term:"TikTok",hint:"A short-form video app where dances, trends, and sounds go viral in hours",diff:1},
+    {term:"Game of Thrones",hint:"A fantasy series about noble families fighting for control of the Iron Throne",diff:1},
+    {term:"ChatGPT",hint:"An AI chatbot released in 2022 that reached 100 million users faster than any app in history",diff:1},
+    {term:"BTS",hint:"A South Korean boy band that became the world's biggest music act with a devoted fanbase called ARMYs",diff:1},
+    {term:"Wordle",hint:"A daily five-letter word guessing game that took the internet by storm in 2021",diff:1},
+    {term:"Stranger Things",hint:"A Netflix sci-fi show about kids in the 80s who encounter supernatural forces in their small town",diff:1},
+    {term:"The Kardashians",hint:"A famous reality TV family whose show ran for 20 seasons and launched multiple empires",diff:1},
+    {term:"Stanley Cup",hint:"A pastel tumbler so popular it caused shopping stampedes and long queues",diff:2},
+  ],
+  "Sports":[
+    {term:"Offside",hint:"A rule in football that stops attackers from gaining an unfair positional advantage",diff:1},
+    {term:"Grand Slam",hint:"In tennis, winning all four major tournaments in one calendar year",diff:1},
+    {term:"Penalty Shootout",hint:"A tiebreaker in football where players take turns shooting one-on-one against the goalkeeper",diff:1},
+    {term:"Hole-in-One",hint:"When a golfer sinks the ball from the tee into the cup in a single stroke",diff:1},
+    {term:"Hat-trick",hint:"Scoring three goals or taking three wickets in a single game or match",diff:1},
+    {term:"Slam Dunk",hint:"A basketball move where a player jumps and forcefully pushes the ball down through the hoop",diff:1},
+    {term:"Marathon",hint:"A road race of exactly 42.195 kilometres, named after a Greek battlefield",diff:1},
+    {term:"Yellow Card",hint:"A caution shown by a referee in football to warn a player for unsporting behaviour",diff:1},
+    {term:"Triple Axel",hint:"One of the hardest jumps in figure skating involving three and a half mid-air rotations",diff:2},
+    {term:"Wild Card",hint:"A spot in a tournament given to a team or player who didn't automatically qualify",diff:1},
+  ],
+  "Fun Facts":[
+    {term:"Honey Never Expires",hint:"Archaeologists found this food in Egyptian tombs and it was still edible after 3,000 years",diff:2},
+    {term:"Bananas Are Berries",hint:"By botanical definition this common yellow fruit qualifies, but strawberries don't",diff:2},
+    {term:"Flamingo Flamboyance",hint:"This is the official name for a group of flamingos — and they're only pink because of what they eat",diff:2},
+    {term:"Oxford University",hint:"Older than the Aztec Empire — this institution was founded before 1200 AD",diff:2},
+    {term:"Sharks Predate Trees",hint:"These ocean predators existed for 200 million years before the first forests appeared on land",diff:3},
+    {term:"Eiffel Tower Grows",hint:"This famous landmark gets 15cm taller in summer due to thermal expansion of the metal",diff:2},
+    {term:"Scotland's National Animal",hint:"Not a stag or a thistle — it's the unicorn",diff:2},
+    {term:"Wombat Poop",hint:"The only animal in the world that produces cube-shaped droppings",diff:2},
+    {term:"Venus Day vs Year",hint:"A single day on this planet lasts longer than its entire orbit around the Sun",diff:3},
+    {term:"Cleopatra and the Moon Landing",hint:"These two events are closer in time than Cleopatra and the building of the pyramids",diff:3},
+  ]
+};
+
+const TEAMS=["Lions","Tigers","Foxes","Wolves","Eagles","Dolphins","Dragons","Butterflies"];
+const EMOJIS=["🦁","🐯","🦊","🐺","🦅","🐬","🐉","🦋"];
+const TEAM_COLORS=["#ff2d55","#ff6b00","#ffd000","#00e676","#00e5ff","#d500f9","#ff4081","#ff9500"];
+const BAR_COLORS=["#ff2d55","#ff6b00","#ffd000","#00e676","#00e5ff","#d500f9","#ff4081","#ff9500"];
+
+let scores=TEAMS.map(()=>0);
+let members=TEAMS.map(()=>[]);
+let round=1;
+let selectedCats=new Set(["Movies","Countries","Food & Drink","Pop Culture","Sports","Fun Facts"]);
+let usedWords=new Set();
+let myTeam=null;
+let myName="";
+
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const cat=btn.dataset.cat;
+    if(selectedCats.has(cat)){if(selectedCats.size>1){selectedCats.delete(cat);btn.classList.remove('selected');}}
+    else{selectedCats.add(cat);btn.classList.add('selected');}
+  });
+});
+
+function generateWord(){
+  const btn=document.getElementById('genBtn');
+  const bar=document.getElementById('loadBar');
+  btn.disabled=true;bar.classList.add('active');
+  const cats=[...selectedCats];
+  const pool=[];cats.forEach(c=>WORDS[c].forEach(w=>pool.push({...w,cat:c})));
+  const fresh=pool.filter(w=>!usedWords.has(w.term));
+  const source=fresh.length>0?fresh:pool;
+  const pick=source[Math.floor(Math.random()*source.length)];
+  usedWords.add(pick.term);
+  setTimeout(()=>{
+    bar.classList.remove('active');btn.disabled=false;
+    document.getElementById('wordCatTag').textContent=pick.cat;
+    document.getElementById('wordTerm').textContent=pick.term;
+    document.getElementById('wordHint').textContent=pick.hint;
+    const dots=document.getElementById('diffDots');
+    dots.innerHTML=[1,2,3].map(i=>`<div class="diff-dot${i<=pick.diff?' lit':''}"></div>`).join('');
+  },800);
+}
+
+function renderJoinGrid(){
+  document.getElementById('joinGrid').innerHTML=TEAMS.map((name,i)=>`
+    <div class="join-card${myTeam===i?' joined':''}" onclick="joinTeam(${i})"
+      style="${myTeam===i?`border-color:${TEAM_COLORS[i]};background:${TEAM_COLORS[i]}18;`:''}">
+      <span class="join-card-emoji">${EMOJIS[i]}</span>
+      <div class="join-card-name" style="color:${TEAM_COLORS[i]}">${name}</div>
+      <div class="join-card-count">${members[i].length} member${members[i].length!==1?'s':''}</div>
+      <span class="joined-badge" style="background:${TEAM_COLORS[i]}">You</span>
+    </div>
+  `).join('');
+}
+renderJoinGrid();
+
+function confirmName(){
+  const val=document.getElementById('playerName').value.trim();
+  if(!val){alert('Please enter your name first!');return;}
+  myName=val;
+  document.getElementById('playerName').disabled=true;
+  document.querySelector('.join-btn').disabled=true;
+  document.querySelector('.join-btn').textContent='Set';
+}
+
+function joinTeam(idx){
+  if(!myName){alert('Enter your name first, then tap Set!');return;}
+  if(myTeam===idx)return;
+  if(myTeam!==null) members[myTeam]=members[myTeam].filter(n=>n!==myName);
+  myTeam=idx;
+  if(!members[idx].includes(myName)) members[idx].push(myName);
+  const banner=document.getElementById('myTeamBanner');
+  banner.style.display='block';
+  document.getElementById('myTeamName').textContent=TEAMS[idx]+' '+EMOJIS[idx];
+  renderJoinGrid();renderScores();
+}
+
+function renderScores(){
+  const sorted=scores.map((s,i)=>({name:TEAMS[i],score:s,idx:i,members:members[i],emoji:EMOJIS[i],color:BAR_COLORS[i]})).sort((a,b)=>b.score-a.score);
+  const max=Math.max(...scores,1);
+  document.getElementById('teamList').innerHTML=sorted.map((t,rank)=>`
+    <div class="team-row${rank===0&&t.score>0?' leader':''}">
+      <div class="team-rank" style="${rank===0&&t.score>0?`color:${t.color}`:''}">
+        ${rank===0&&t.score>0?'':''}${rank+1}
+      </div>
+      <div class="team-name-col">
+        <div class="team-name-text" style="color:${t.color}">${t.emoji} ${t.name}</div>
+        <div class="team-member-count">${t.members.length>0?t.members.join(', '):'No members yet'}</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round((t.score/max)*100)}%;background:${t.color};"></div></div>
+      <div class="team-pts" style="color:${t.color}">${t.score}</div>
+    </div>
+  `).join('');
+  document.getElementById('roundBadge').textContent=`Round ${round}`;
+}
+renderScores();
+
+function addPoint(){
+  const name=prompt('Award a point to which team?\n('+TEAMS.join(', ')+')');
+  if(!name)return;
+  const idx=TEAMS.findIndex(t=>t.toLowerCase().includes(name.toLowerCase()));
+  if(idx>=0){scores[idx]++;renderScores();}else alert('Team not found. Try: '+TEAMS.join(', '));
+}
+function addBonus(){
+  const name=prompt('Bonus +2 for which team?\n('+TEAMS.join(', ')+')');
+  if(!name)return;
+  const idx=TEAMS.findIndex(t=>t.toLowerCase().includes(name.toLowerCase()));
+  if(idx>=0){scores[idx]+=2;renderScores();}else alert('Team not found.');
+}
+function nextRound(){round++;renderScores();}
+function resetAll(){
+  if(confirm('Reset everything — scores, members, and rounds?')){
+    scores=TEAMS.map(()=>0);members=TEAMS.map(()=>[]);round=1;
+    myTeam=null;myName='';usedWords.clear();
+    document.getElementById('playerName').disabled=false;
+    document.getElementById('playerName').value='';
+    document.querySelector('.join-btn').disabled=false;
+    document.querySelector('.join-btn').textContent='Set';
+    document.getElementById('myTeamBanner').style.display='none';
+    renderJoinGrid();renderScores();
+  }
+}
+
+let totalSecs=30,remaining=30,timerRunning=false,timerInterval=null;
+const CIRC=2*Math.PI*62;
+function setTimer(secs,el){
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');totalSecs=secs;remaining=secs;
+  if(timerRunning){clearInterval(timerInterval);timerRunning=false;document.getElementById('startBtn').textContent='Start';}
+  updateTimerDisplay();
+}
+function updateTimerDisplay(){
+  const m=Math.floor(remaining/60),s=remaining%60;
+  const face=document.getElementById('timerFace');
+  const ring=document.getElementById('ringFill');
+  const label=document.getElementById('timerLabel');
+  face.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  ring.style.strokeDashoffset=CIRC*(1-remaining/totalSecs);
+  const urgent=remaining<=10&&remaining>0;
+  face.className='timer-face'+(urgent?' urgent':'');
+  ring.style.stroke=urgent?'#ff2d55':'url(#tg)';
+  label.textContent=timerRunning?(remaining>0?'Time is ticking...':"Time's up!"):remaining===totalSecs?'Choose a duration and start':'Paused';
+}
+function toggleTimer(){
+  const btn=document.getElementById('startBtn');
+  if(timerRunning){clearInterval(timerInterval);timerRunning=false;btn.textContent='Resume';}
+  else if(remaining>0){
+    timerRunning=true;btn.textContent='Pause';
+    timerInterval=setInterval(()=>{remaining--;updateTimerDisplay();if(remaining<=0){clearInterval(timerInterval);timerRunning=false;btn.textContent='Start';}},1000);
+  }
+}
+function resetTimer(){
+  clearInterval(timerInterval);timerRunning=false;remaining=totalSecs;
+  document.getElementById('startBtn').textContent='Start';updateTimerDisplay();
+}
+updateTimerDisplay();
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['words','join','score','timer'][i]===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+</script>
